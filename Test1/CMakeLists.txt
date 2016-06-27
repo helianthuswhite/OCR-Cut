@@ -1,5 +1,0 @@
-project( Test )
-find_package( OpenCV REQUIRED )
-add_executable( Test Test )
-target_link_libraries( Test ${OpenCV_LIBS} )
-include_directories(${OpenCV_INCLUDE_DIRS})

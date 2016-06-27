@@ -1,0 +1,5 @@
+project( Main )
+find_package( OpenCV REQUIRED )
+add_executable( Main Main )
+target_link_libraries( Main ${OpenCV_LIBS} )
+include_directories(${OpenCV_INCLUDE_DIRS})
