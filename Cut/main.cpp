@@ -2,7 +2,7 @@
 #include <opencv2/highgui.hpp>  
 #include <opencv/cxcore.h> 
 
-#define IMAGE "/Users/W_littlewhite/Documents/Git/OCR-Cut/Cut/test_img.png"
+#define IMAGE "/Users/W_littlewhite/Documents/Git/OCR-Cut/test_img4.png"
 
 using namespace cv;  
   
@@ -15,8 +15,8 @@ int main(int argc, char* argv[])
     IplImage* img_gray = cvCreateImage(cvGetSize(imgSrc), IPL_DEPTH_8U, 1);
     cvCvtColor(imgSrc, img_gray, CV_BGR2GRAY);
 //    二值化处理
-    cvThreshold(img_gray, img_gray,100, 255,CV_THRESH_BINARY);// CV_THRESH_BINARY_INV使得背景为黑色，字符为白色，这样找到的最外层才是字符的最外层
-    cvShowImage("ThresholdImg",img_gray);  
+    cvThreshold(img_gray, img_gray,100, 255,CV_THRESH_BINARY_INV);// CV_THRESH_BINARY_INV使得背景为黑色，字符为白色，这样找到的最外层才是字符的最外层
+    cvShowImage("ThresholdImg",img_gray);
     CvSeq* contours = NULL;  
     CvMemStorage* storage = cvCreateMemStorage(0);
 //    检索轮廓并返回检测到的轮廓数量
