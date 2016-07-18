@@ -1,3 +1,0 @@
-/Users/W_littlewhite/Documents/Git/OCR-Cut/Test/CMakeFiles/edit_cache.dir
-/Users/W_littlewhite/Documents/Git/OCR-Cut/Test/CMakeFiles/rebuild_cache.dir
-/Users/W_littlewhite/Documents/Git/OCR-Cut/Test/CMakeFiles/Test.dir
