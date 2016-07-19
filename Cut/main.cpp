@@ -2,7 +2,7 @@
 #include <opencv2/highgui.hpp>  
 #include <opencv/cxcore.h> 
 
-#define IMAGE "/Users/W_littlewhite/Documents/Git/OCR-Cut/test_img4.png"
+#define IMAGE "/Users/W_littlewhite/Documents/Git/OCR-Cut/test_img2.png"
 
 using namespace cv;  
   
