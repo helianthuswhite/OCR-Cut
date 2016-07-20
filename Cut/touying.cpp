@@ -6,13 +6,9 @@
 
 using namespace cv;
 
-int* projectH(IplImage* src);
+int* project(IplImage* src,int number);
 
-int* projectW(IplImage* src);
-
-void cutH(int* h,IplImage* src);
-
-void cutW(int* h,IplImage* src);
+void cut(int* h,IplImage* src,int number);
 
 //计数器
 int count = 0;
@@ -31,10 +27,10 @@ int main(int argc, char* argv[])
     cvShowImage("ThresholdImg",img_gray);
     
 //    执行投影操作
-    int *h = projectH(img_gray);
+    int *h = project(img_gray,img_gray->height);
     
-//    将图片切割分行
-    cutH(h,img_gray);
+//    执行分割操作
+    cut(h,img_gray,img_gray->height);
     
     printf("找到的汉字数量为：%d",count);
     //显示
@@ -46,11 +42,11 @@ int main(int argc, char* argv[])
 }
 
 
-int* projectH(IplImage* src) {
+int* project(IplImage* src,int number) {
     //存储投影值的数组
-    int* h = new int[src->height];
-    for(int y = 0;y < src->height;y++) {
-        h[y] = 0;
+    int* a = new int[number];
+    for(int i = 0;i < number;i++) {
+        a[i] = 0;
     }
     //对每一行计算投影值
     for(int y = 0;y < src->height;y++)
@@ -59,92 +55,58 @@ int* projectH(IplImage* src) {
         //遍历这一行的每一个像素，如果是有效的，累加投影值
         for(int x = 0;x < src->width;x++)
         {
-            if(ptr[x] == 255)
-                h[y]++;
+            if(ptr[x] == 255) {
+                if (number == src->height) {
+                    a[y]++;
+                } else {
+                    a[x]++;
+                }
+            }
         }
     }
     
-    return h;
+    return a;
 }
 
-int* projectW(IplImage* src) {
-    //存储投影值的数组
-    int* w = new int[src->width];
-    for(int x = 0;x < src->width;x++) {
-        w[x] = 0;
-    }
-    //对每一列计算投影值
-    for(int y = 0;y < src->height;y++)
-    {
-        uchar* ptr = (uchar*)(src->imageData + y*src->widthStep);
-        //遍历这一行的每一个像素，如果是有效的，累加投影值
-        for(int x = 0;x < src->width;x++)
-        {
-            if(ptr[x] == 255)
-                w[x]++;
-        }
-    }
-    return w;
-}
 
-void cutH(int* h,IplImage* src) {
+void cut(int* a,IplImage* src,int number) {
     bool inWord = false;
     //分割开始位置和结束位置
     int start = 0,end = 0;
-    //    获得行数
-    int HEIGHT = src->height;
     //    存储每一行的图片
-    IplImage* imgNo;
-    //存储
-    for(int y = 0;y < HEIGHT;y++)
-    {
-        if(!inWord && h[y] > 0) {
-            inWord = true;
-            start = y;
-        }else if(inWord && h[y] == 0) {
-            inWord = false;
-            end = y;
-            imgNo = cvCreateImage(cvSize(src->width,end-start+1), IPL_DEPTH_8U, 1);
-            cvSetImageROI(src, cvRect(0, start, imgNo->width, imgNo->height));
-            cvCopyImage(src, imgNo);
-            cvResetImageROI(src);
-            //对每一行的图像进行列投影处理
-            int* w = projectW(imgNo);
-            cutW(w,imgNo);
-        }
-    }
-
-}
-
-void cutW(int* w,IplImage* src) {
-    bool inWord = false;
-    //分割开始位置和结束位置
-    int start = 0,end = 0;
-    //    获得列数
-    int WIDTH = src->width;
-    //    存储每一列的图片
     IplImage* imgNo;
     char szName[100] = {0};
     //存储
-    for(int x = 0;x < WIDTH;x++)
+    for(int i = 0;i < number;i++)
     {
-        if(!inWord && w[x] > 0) {
+        if(!inWord && a[i] > 0) {
             inWord = true;
-            start = x;
-        }else if(inWord && w[x] == 0) {
+            start = i;
+        }else if(inWord && a[i] == 0) {
             inWord = false;
-            end = x;
-            imgNo = cvCreateImage(cvSize(end-start+1,src->height), IPL_DEPTH_8U, 1);
-            cvSetImageROI(src, cvRect(start-1, 0, imgNo->width, imgNo->height));
-            cvCopyImage(src, imgNo);
-            cvResetImageROI(src);
-//            显示每一行的结果
-            sprintf(szName, "windowstart_%d", start);
-            cvNamedWindow(szName);
-            cvShowImage(szName, imgNo);
-            cvReleaseImage(&imgNo);
-            count++;
+            end = i;
+            if(number == src->height) {
+                imgNo = cvCreateImage(cvSize(src->width,end-start+1), IPL_DEPTH_8U, 1);
+                cvSetImageROI(src, cvRect(0, start, imgNo->width, imgNo->height));
+                cvCopyImage(src, imgNo);
+                cvResetImageROI(src);
+                //对每一行的图像进行列投影处理
+                int* w = project(imgNo,imgNo->width);
+                cut(w,imgNo,imgNo->width);
+
+            }else {
+                imgNo = cvCreateImage(cvSize(end-start+1,src->height), IPL_DEPTH_8U, 1);
+                cvSetImageROI(src, cvRect(start-1, 0, imgNo->width, imgNo->height));
+                cvCopyImage(src, imgNo);
+                cvResetImageROI(src);
+                //            显示每一行的结果
+                sprintf(szName, "windowstart_%d", count);
+                cvNamedWindow(szName);
+                cvShowImage(szName, imgNo);
+                cvReleaseImage(&imgNo);
+                count++;
+            }
         }
     }
-
+    return;
 }
