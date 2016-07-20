@@ -1,8 +1,9 @@
 #include <opencv/cv.h>
 #include <opencv2/highgui.hpp>
 #include <opencv/cxcore.h>
+#include <sys/time.h>
 
-#define IMAGE "/Users/W_littlewhite/Documents/Git/OCR-Cut/test_img4.png"
+#define IMAGE "/Users/W_littlewhite/Documents/Git/OCR-Cut/test_img2.png"
 
 using namespace cv;
 
@@ -10,11 +11,20 @@ int* project(IplImage* src,int number);
 
 void cut(int* h,IplImage* src,int number);
 
+long getCurrentTime()
+{
+    struct timeval tv;
+    gettimeofday(&tv,NULL);
+    return tv.tv_sec * 1000 + tv.tv_usec / 1000;
+}
+
 //计数器
 int count = 0;
 
 int main(int argc, char* argv[])
 {
+    
+    printf("begin:%ld\n",getCurrentTime());
     //    加载图像
     IplImage* imgSrc = cvLoadImage(IMAGE,CV_LOAD_IMAGE_COLOR);
     
@@ -33,6 +43,8 @@ int main(int argc, char* argv[])
     cut(h,img_gray,img_gray->height);
     
     printf("找到的汉字数量为：%d",count);
+    
+    printf("\nend:%ld\n",getCurrentTime());
     //显示
     cvWaitKey(0);
     cvReleaseImage(&imgSrc);
@@ -114,3 +126,4 @@ void cut(int* a,IplImage* src,int number) {
     }
     return;
 }
+
