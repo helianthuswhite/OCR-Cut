@@ -24,11 +24,11 @@ int main(int argc, char* argv[])
     
     //    二值化处理
     cvThreshold(img_gray, img_gray,100, 255,CV_THRESH_BINARY_INV);// CV_THRESH_BINARY_INV使得背景为黑色，字符为白色，这样找到的最外层才是字符的最外层
-    cvShowImage("ThresholdImg",img_gray);
+    cvShowImage("Threshold", img_gray);
     
-//    执行投影操作
+//    执行行投影操作
     int *h = project(img_gray,img_gray->height);
-    
+
 //    执行分割操作
     cut(h,img_gray,img_gray->height);
     
@@ -43,20 +43,25 @@ int main(int argc, char* argv[])
 
 
 int* project(IplImage* src,int number) {
+//    
+    IplImage* img_temp = cvCreateImage(cvGetSize(src), IPL_DEPTH_8U, 1);
+    cvCopyImage(src, img_temp);
+    //膨胀操作
+    cvDilate(img_temp, img_temp,NULL);
     //存储投影值的数组
     int* a = new int[number];
     for(int i = 0;i < number;i++) {
         a[i] = 0;
     }
     //对每一行计算投影值
-    for(int y = 0;y < src->height;y++)
+    for(int y = 0;y < img_temp->height;y++)
     {
-        uchar* ptr = (uchar*)(src->imageData + y*src->widthStep);
+        uchar* ptr = (uchar*)(img_temp->imageData + y*img_temp->widthStep);
         //遍历这一行的每一个像素，如果是有效的，累加投影值
-        for(int x = 0;x < src->width;x++)
+        for(int x = 0;x < img_temp->width;x++)
         {
             if(ptr[x] == 255) {
-                if (number == src->height) {
+                if (number == img_temp->height) {
                     a[y]++;
                 } else {
                     a[x]++;
@@ -96,15 +101,14 @@ void cut(int* a,IplImage* src,int number) {
 
             }else {
                 imgNo = cvCreateImage(cvSize(end-start+1,src->height), IPL_DEPTH_8U, 1);
-                cvSetImageROI(src, cvRect(start-1, 0, imgNo->width, imgNo->height));
+                cvSetImageROI(src, cvRect(start, 0, imgNo->width, imgNo->height));
                 cvCopyImage(src, imgNo);
                 cvResetImageROI(src);
                 //            显示每一行的结果
-                sprintf(szName, "windowstart_%d", count);
+                sprintf(szName, "windowstart_%d", ++count);
                 cvNamedWindow(szName);
                 cvShowImage(szName, imgNo);
                 cvReleaseImage(&imgNo);
-                count++;
             }
         }
     }
