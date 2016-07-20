@@ -2,7 +2,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv/cxcore.h>
 
-#define IMAGE "/Users/W_littlewhite/Documents/Git/OCR-Cut/test_img2.png"
+#define IMAGE "/Users/W_littlewhite/Documents/Git/OCR-Cut/test_img4.png"
 
 using namespace cv;
 
@@ -44,8 +44,14 @@ int main(int argc, char* argv[])
     bool inWord = false;
     //分割开始位置和结束位置
     int start = 0,end = 0;
-    char szName[56] = {0};
-    for(int y = 0;y < paintY->height;y++)
+//    char szName[56] = {0};
+//    获得行数
+    int HEIGHT = paintY->height;
+//    存储每一行的图片
+    IplImage* imgNo[HEIGHT];
+    int i = 0;
+    //存储
+    for(int y = 0;y < HEIGHT;y++)
     {
         if(!inWord && h[y] > 0) {
             inWord = true;
@@ -53,21 +59,60 @@ int main(int argc, char* argv[])
         }else if(inWord && h[y] == 0) {
             inWord = false;
             end = y;
-            IplImage* imgNo = cvCreateImage(cvSize(img_gray->width,end-start+1), IPL_DEPTH_8U, 1);
-            cvSetImageROI(img_gray, cvRect(0, start, imgNo->width, imgNo->height));
-            cvCopyImage(img_gray, imgNo);
+            imgNo[i] = cvCreateImage(cvSize(img_gray->width,end-start+1), IPL_DEPTH_8U, 1);
+            cvSetImageROI(img_gray, cvRect(0, start, imgNo[i]->width, imgNo[i]->height));
+            cvCopyImage(img_gray, imgNo[i]);
             cvResetImageROI(img_gray);
-            sprintf(szName, "windowstart_%d", start);
-            cvNamedWindow(szName);
-            cvShowImage(szName, imgNo);
-            cvReleaseImage(&imgNo);
+            i++;
+//            sprintf(szName, "windowstart_%d", start);
+//            cvNamedWindow(szName);
+//            cvShowImage(szName, imgNo[y]);
+//            cvReleaseImage(&imgNo[y]);
         }
 //        printf("%d\n",h[y]);
     }
     
+    
+//    准备对列进行投影
+    //存储投影值的数组
+    int* w = new int[imgNo[0]->width];
+    for(int x = 0;x < imgNo[0]->width;x++) {
+        w[x] = 0;
+    }
+    //对每一列计算投影值
+    for(int y = 0;y < imgNo[0]->height;y++)
+    {
+        uchar* ptr = (uchar*)(imgNo[0]->imageData + y*imgNo[0]->widthStep);
+        //遍历这一行的每一个像素，如果是有效的，累加投影值
+        for(int x = 0;x < img_gray->width;x++)
+        {
+            if(ptr[x] == 255)
+                w[x]++;
+        }
+    }
+    
+    //准备一个图像用于画投影图
+    IplImage* paintX = cvCreateImage(cvGetSize(imgNo[0]), IPL_DEPTH_8U, 1);
+    cvZero(paintX);
+    
+    
+    //画图
+    CvScalar t= cvScalar(255,0,0,0);
+    //    是否进入投影区
+    inWord = false;
+    //分割开始位置和结束位置
+    start = 0,end = 0;
+//        char szName[56] = {0};
+    //存储
+    for(int x = 0;x < imgNo[0]->width;x++)
+    {
+        for(int y = 0;y < w[x];y++)
+            cvSet2D(paintX, y, x, t);
+    }
+    
     //显示
-//    cvNamedWindow("PaintY");
-//    cvShowImage("PaintY", paintY);
+    cvNamedWindow("PaintX");
+    cvShowImage("PaintX", paintX);
     cvWaitKey(0);
     cvReleaseImage(&imgSrc);
     cvReleaseImage(&img_gray);
