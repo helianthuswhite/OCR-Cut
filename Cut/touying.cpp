@@ -95,14 +95,13 @@ int main(int argc, char* argv[])
     IplImage* paintX = cvCreateImage(cvGetSize(imgNo[0]), IPL_DEPTH_8U, 1);
     cvZero(paintX);
     
-    
     //画图
     CvScalar t= cvScalar(255,0,0,0);
     //    是否进入投影区
     inWord = false;
     //分割开始位置和结束位置
     start = 0,end = 0;
-//        char szName[56] = {0};
+    char szName[56] = {0};
     //存储
     for(int x = 0;x < imgNo[0]->width;x++)
     {
@@ -110,12 +109,35 @@ int main(int argc, char* argv[])
             cvSet2D(paintX, y, x, t);
     }
     
+    //进行切割
+    for(int x = 0;x < imgNo[0]->width;x++) {
+        if(!inWord && w[x]>0) {
+            start = x;
+            inWord = true;
+        } else if(inWord && w[x] == 0) {
+            end = x;
+            inWord = false;
+            IplImage* imgNo2 = cvCreateImage(cvSize(end-start+1,imgNo[0]->height), IPL_DEPTH_8U, 1);
+            cvSetImageROI(img_gray, cvRect(start, 0, imgNo2->width, imgNo2->height));
+            cvCopyImage(img_gray, imgNo2);
+            cvResetImageROI(img_gray);
+            sprintf(szName, "windowstart_%d", start);
+            cvNamedWindow(szName);
+            cvShowImage(szName, imgNo2);
+            cvReleaseImage(&imgNo2);
+
+        }
+    }
+    
+    cvNamedWindow("imgNo[0]");
+    cvShowImage("imgNo[0]", imgNo[0]);
     //显示
-    cvNamedWindow("PaintX");
-    cvShowImage("PaintX", paintX);
+//    cvNamedWindow("PaintX");
+//    cvShowImage("PaintX", paintX);
     cvWaitKey(0);
     cvReleaseImage(&imgSrc);
     cvReleaseImage(&img_gray);
+    cvReleaseImage(&imgNo[0]);
 //    cvReleaseImage(&paintY);
     cvDestroyAllWindows();
     return 0;  
