@@ -3,7 +3,7 @@
 #include <opencv/cxcore.h>
 #include <sys/time.h>
 
-#define IMAGE "/Users/W_littlewhite/Documents/Git/OCR-Cut/test_img4.png"
+#define IMAGE "/Users/W_littlewhite/Documents/Git/OCR-Cut/real_img2s.jpg"
 
 using namespace cv;
 
@@ -37,14 +37,18 @@ int main(int argc, char* argv[])
 //    查找阈值
 //    int threshold = findThreshold(img_gray);
     
-    //    二值化处理
-    cvAdaptiveThreshold(img_gray, img_gray, 255,CV_ADAPTIVE_THRESH_MEAN_C,CV_THRESH_BINARY_INV);// CV_THRESH_BINARY_INV使得背景为黑色，字符为白色，这样找到的最外层才是字符的最外层
+//    全局二值化处理
+    cvThreshold(img_gray, img_gray, 100, 255, CV_THRESH_BINARY_INV);
+    
+//    局部自适应二值化处理
+//    cvAdaptiveThreshold(img_gray, img_gray, 255,CV_ADAPTIVE_THRESH_MEAN_C,CV_THRESH_BINARY_INV);// CV_THRESH_BINARY_INV使得背景为黑色，字符为白色，这样找到的最外层才是字符的最外层
+    cvNamedWindow("Threshold",0);
     cvShowImage("Threshold", img_gray);
     
-//    降噪处理
-    cvSmooth(img_gray, img_gray,CV_GAUSSIAN);
-    cvSmooth(img_gray, img_gray,CV_GAUSSIAN);
-    cvShowImage("Smooth", img_gray);
+////    降噪处理
+//    cvSmooth(img_gray, img_gray,CV_GAUSSIAN);
+//    cvSmooth(img_gray, img_gray,CV_GAUSSIAN);
+//    cvShowImage("Smooth", img_gray);
     
 //    执行行投影操作
     int *h = project(img_gray,img_gray->height);
