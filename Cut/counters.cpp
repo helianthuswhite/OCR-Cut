@@ -2,7 +2,7 @@
 #include <opencv2/highgui.hpp>  
 #include <opencv/cxcore.h> 
 
-#define IMAGE "/Users/W_littlewhite/Documents/Git/OCR-Cut/test_img2.png"
+#define IMAGE "/Users/W_littlewhite/Documents/Git/OCR-Cut/real_img2s.jpg"
 
 using namespace cv;  
   
@@ -16,6 +16,9 @@ int main(int argc, char* argv[])
     cvCvtColor(imgSrc, img_gray, CV_BGR2GRAY);
 //    二值化处理
     cvThreshold(img_gray, img_gray,100, 255,CV_THRESH_BINARY_INV);// CV_THRESH_BINARY_INV使得背景为黑色，字符为白色，这样找到的最外层才是字符的最外层
+    //膨胀操作
+    cvDilate(img_gray, img_gray,NULL,4);
+    
     cvShowImage("ThresholdImg",img_gray);
     CvSeq* contours = NULL;  
     CvMemStorage* storage = cvCreateMemStorage(0);
