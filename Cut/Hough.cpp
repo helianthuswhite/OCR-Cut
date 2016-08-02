@@ -4,72 +4,44 @@
 
 #define IMAGE "/Users/W_littlewhite/Documents/Git/OCR-Cut/real_img2s.jpg"
 
-// clockwise 为true则顺时针旋转，否则为逆时针旋转
-IplImage* rotateImage(IplImage* src, int angle, bool clockwise)
-{
-    angle = abs(angle) % 180;
-    if (angle > 90)
-    {
-        angle = 90 - (angle % 90);
-    }
-    IplImage* dst = NULL;
-    int width =
-    (double)(src->height * sin(angle * CV_PI / 180.0)) +
-    (double)(src->width * cos(angle * CV_PI / 180.0 )) + 1;
-    int height =
-    (double)(src->height * cos(angle * CV_PI / 180.0)) +
-    (double)(src->width * sin(angle * CV_PI / 180.0 )) + 1;
-    int tempLength = sqrt((double)src->width * src->width + src->height * src->height) + 10;
-    int tempX = (tempLength + 1) / 2 - src->width / 2;
-    int tempY = (tempLength + 1) / 2 - src->height / 2;
-    int flag = -1;
-    
-    dst = cvCreateImage(cvSize(width, height), src->depth, src->nChannels);
-    cvZero(dst);
-    IplImage* temp = cvCreateImage(cvSize(tempLength, tempLength), src->depth, src->nChannels);
-    cvZero(temp);
-    
-    cvSetImageROI(temp, cvRect(tempX, tempY, src->width, src->height));
-    cvCopy(src, temp, NULL);
-    cvResetImageROI(temp);
-    
-    if (clockwise)
-        flag = 1;
-    
-    float m[6];
-    int w = temp->width;
-    int h = temp->height;
-    m[0] = (float) cos(flag * angle * CV_PI / 180.);
-    m[1] = (float) sin(flag * angle * CV_PI / 180.);
-    m[3] = -m[1];
-    m[4] = m[0];
-    // 将旋转中心移至图像中间
-    m[2] = w * 0.5f;
-    m[5] = h * 0.5f;
-    //
-    CvMat M = cvMat(2, 3, CV_32F, m);
-    cvGetQuadrangleSubPix(temp, dst, &M);
-    cvReleaseImage(&temp);
-    return dst;
-}
-
 int main(int argc, char **argv)
 {
-    IplImage *src = 0;
-    IplImage *dst = 0;
-    // 旋转角度
-    int angle = 90;
-    
-    src = cvLoadImage(IMAGE,CV_LOAD_IMAGE_COLOR);
-    cvNamedWindow("src", 1);
-    cvShowImage("src", src);
-    
-    dst = rotateImage(src, angle, false);
-    cvNamedWindow("dst", 2);
-    cvShowImage("dst", dst);
+    //    加载灰度图像
+    IplImage* image = cvLoadImage(
+                                  IMAGE,
+                                  CV_LOAD_IMAGE_GRAYSCALE
+                                  );
+    //    变成更好看的彩色
+    IplImage* src = cvLoadImage( IMAGE ); //Changed for prettier show in color
+    //    创建存储区
+    CvMemStorage* storage = cvCreateMemStorage(0);
+    //    模糊处理，输入输出、模糊方法、水平和竖直方向sigma值
+    cvSmooth(image, image, CV_GAUSSIAN, 5, 5 );
+    //    进行霍夫圆变换
+    CvSeq* results = cvHoughCircles(
+                                    image,
+                                    storage,
+                                    CV_HOUGH_GRADIENT,
+                                    4,
+                                    image->width/10
+                                    );
+    //    遍历结果集
+    for( int i = 0; i < results->total; i++ ) {
+        //      返回索引制定的元素指针
+        float* p = (float*) cvGetSeqElem( results, i );
+        //      创建圆心
+        CvPoint pt = cvPoint( cvRound( p[0] ), cvRound( p[1] ) );
+        //      绘制圆
+        cvCircle(
+                 src,
+                 pt, 
+                 cvRound( p[2] ),
+                 CV_RGB(0xff,0,0) 
+                 );
+    }
+    //    显示结果
+    cvNamedWindow( "cvHoughCircles", 1 );
+    cvShowImage( "cvHoughCircles", src);
     cvWaitKey(0);
-    
-    cvReleaseImage(&src);
-    cvReleaseImage(&dst);
-    return 0;
+
 }
