@@ -47,10 +47,12 @@ int main(int argc, char **argv)
     lines = cvHoughLines2( dst, storage, CV_HOUGH_PROBABILISTIC, 1, CV_PI/180, 100, 50, 100 );
     for( i = 0; i < lines->total; i++ )
     {
+//        获取到每一条直线的长度
         line = (CvPoint*)cvGetSeqElem(lines,i);
         linesLong[i] = (int)sqrt((line[1].x - line[0].x) * (line[1].x - line[0].x) + (line[1].y - line[0].y) * (line[1].y - line[0].y));
 
     }
+//    冒泡排序找到最长直线
     for (int m = 0; m<i-1; m++) {
         for (int n = 1; n<i; n++) {
             if (linesLong[m]<=linesLong[n]) {
@@ -60,7 +62,7 @@ int main(int argc, char **argv)
             }
         }
     }
-
+//    选取最长直线为标准求角度
     for( i = 0; i < lines->total; i++ )
     {
         line = (CvPoint*)cvGetSeqElem(lines,i);
@@ -77,7 +79,7 @@ int main(int argc, char **argv)
     cvNamedWindow( "Hough_1", 1 );
     cvShowImage( "Hough_1", color_dst );
 
-    
+//    旋转变换
     src = rotate(src, -alpha*180/M_PI);
     
     color_dst = rotate(color_dst, -alpha*180/M_PI);
