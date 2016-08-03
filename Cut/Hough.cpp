@@ -15,6 +15,8 @@ int main(int argc, char **argv)
     IplImage* color_dst;
     CvMemStorage* storage = cvCreateMemStorage(0);
     CvSeq* lines = 0;
+    CvPoint* line;
+    int* linesLong = {0};
     int i;
     
     if( !src )
@@ -31,39 +33,39 @@ int main(int argc, char **argv)
     cvThreshold(src, dst,threshold, 255,CV_THRESH_BINARY_INV);
     
     //膨胀操作
-    cvDilate(dst, dst,NULL,4);
+    cvDilate(dst, dst,NULL,10);
     
     cvCanny( dst, dst, 50, 200, 3 );
     //cvThreshold(src, dst, 50, 255, CV_THRESH_BINARY_INV);
     
     cvCvtColor( dst, color_dst, CV_GRAY2BGR );
-#if 1   //标准hough变换
-    printf("标准hough变换\n");
-    lines = cvHoughLines2( dst, storage, CV_HOUGH_STANDARD, 1, CV_PI/180, 100, 0, 0 );
     
-    for( i = 0; i < MIN(lines->total,100); i++ )
-    {
-        float* line = (float*)cvGetSeqElem(lines,i);
-        float rho = line[0];
-        float theta = line[1];
-        CvPoint pt1, pt2;
-        double a = cos(theta), b = sin(theta);
-        double x0 = a*rho, y0 = b*rho;
-        pt1.x = cvRound(x0 + 1000*(-b));
-        pt1.y = cvRound(y0 + 1000*(a));
-        pt2.x = cvRound(x0 - 1000*(-b));
-        pt2.y = cvRound(y0 - 1000*(a));
-        cvLine( color_dst, pt1, pt2, CV_RGB(255,0,0), 3, CV_AA, 0 );
-    }
-#else   //累积概率hough变换
-    printf("累积概率hough变换\n");
-    lines = cvHoughLines2( dst, storage, CV_HOUGH_PROBABILISTIC, 1, CV_PI/180, 50, 50, 10 );
+    //累积概率hough变换
+    lines = cvHoughLines2( dst, storage, CV_HOUGH_PROBABILISTIC, 1, CV_PI/180, 100, 50, 100 );
     for( i = 0; i < lines->total; i++ )
     {
-        CvPoint* line = (CvPoint*)cvGetSeqElem(lines,i);
+        line = (CvPoint*)cvGetSeqElem(lines,i);
+        printf("%d 呵呵 %d\n",line[1].x,line[0].x);
         cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 3, CV_AA, 0 );
+        linesLong[i] = line[1].x - line[0].x;
     }
-#endif
+    for (int m = 0; m<i-1; m++) {
+        for (int n = 1; n<i; n++) {
+            if (linesLong[m]<=linesLong[n]) {
+                int temp = linesLong[m];
+                linesLong[m] = linesLong[n];
+                linesLong[n] = temp;
+            }
+        }
+    }
+    for( i = 0; i < lines->total; i++ )
+    {
+        line = (CvPoint*)cvGetSeqElem(lines,i);
+        if ((line[1].x - line[0].x) == linesLong[0]) {
+            cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 3, CV_AA, 0 );
+        }
+    }
+
     cvNamedWindow( "Source", 1 );
     cvShowImage( "Source", src );
     
