@@ -47,24 +47,24 @@ int main(int argc, char **argv)
         line = (CvPoint*)cvGetSeqElem(lines,i);
         printf("%d 呵呵 %d\n",line[1].x,line[0].x);
         cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 3, CV_AA, 0 );
-        linesLong[i] = line[1].x - line[0].x;
+//        linesLong[i] = line[1].x - line[0].x;
     }
-    for (int m = 0; m<i-1; m++) {
-        for (int n = 1; n<i; n++) {
-            if (linesLong[m]<=linesLong[n]) {
-                int temp = linesLong[m];
-                linesLong[m] = linesLong[n];
-                linesLong[n] = temp;
-            }
-        }
-    }
-    for( i = 0; i < lines->total; i++ )
-    {
-        line = (CvPoint*)cvGetSeqElem(lines,i);
-        if ((line[1].x - line[0].x) == linesLong[0]) {
-            cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 3, CV_AA, 0 );
-        }
-    }
+//    for (int m = 0; m<i-1; m++) {
+//        for (int n = 1; n<i; n++) {
+//            if (linesLong[m]<=linesLong[n]) {
+//                int temp = linesLong[m];
+//                linesLong[m] = linesLong[n];
+//                linesLong[n] = temp;
+//            }
+//        }
+//    }
+//    for( i = 0; i < lines->total; i++ )
+//    {
+//        line = (CvPoint*)cvGetSeqElem(lines,i);
+//        if ((line[1].x - line[0].x) == linesLong[0]) {
+//            cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 3, CV_AA, 0 );
+//        }
+//    }
 
     cvNamedWindow( "Source", 1 );
     cvShowImage( "Source", src );
