@@ -8,6 +8,8 @@ bool IsDimodal(double HistGram[256]);
 
 int FindThreshold(IplImage* imgSrc);
 
+IplImage* rotate(IplImage* src,double angle);
+
 int main(int argc, char **argv)
 {
     IplImage* src = cvLoadImage( IMAGE, 0 );
@@ -68,7 +70,9 @@ int main(int argc, char **argv)
             printf("%lf",alpha);
         }
     }
-
+    
+    color_dst = rotate(color_dst, alpha);
+    
     cvNamedWindow( "Source", 1 );
     cvShowImage( "Source", src );
     
@@ -137,4 +141,30 @@ bool IsDimodal(double HistGram[256]) {
         return true;
     else
         return false;
+}
+
+//传入角度对图像进行旋转
+IplImage* rotate(IplImage* src,double angle) {
+    //    创建矩阵
+    CvMat* rot_mat = cvCreateMat(2,3,CV_32FC1);
+    IplImage *dst;
+    //        复制图像
+    dst = cvCloneImage(src);
+    //        设置原点
+    dst->origin = src->origin;
+    //        初始化元素值
+    cvZero(dst);
+    
+    //COMPUTE ROTATION MATRIX
+    //        创建旋转矩阵
+    CvPoint2D32f center = cvPoint2D32f(src->width/2,
+                                       src->height/2);
+    double scale = 1;
+    //        生成旋转的映射矩阵
+    cv2DRotationMatrix(center,angle,scale,rot_mat);
+    //        进行仿射变换
+    cvWarpAffine(src,dst,rot_mat);
+
+    return dst;
+
 }
