@@ -71,13 +71,22 @@ int main(int argc, char **argv)
         }
     }
     
-    color_dst = rotate(color_dst, alpha);
+    cvNamedWindow( "Source_1", 1 );
+    cvShowImage( "Source_1", src );
     
-    cvNamedWindow( "Source", 1 );
-    cvShowImage( "Source", src );
+    cvNamedWindow( "Hough_1", 1 );
+    cvShowImage( "Hough_1", color_dst );
+
     
-    cvNamedWindow( "Hough", 1 );
-    cvShowImage( "Hough", color_dst );
+    src = rotate(src, -alpha*180/M_PI);
+    
+    color_dst = rotate(color_dst, -alpha*180/M_PI);
+    
+    cvNamedWindow( "Source_2", 1 );
+    cvShowImage( "Source_2", src );
+    
+    cvNamedWindow( "Hough_2", 1 );
+    cvShowImage( "Hough_2", color_dst );
     
     cvWaitKey(0);
     
