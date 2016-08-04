@@ -2,7 +2,7 @@
 #include "opencv2/highgui.hpp"
 #include "math.h"
 
-#define IMAGE "/Users/W_littlewhite/Documents/Git/OCR-Cut/real_img2s.jpg"
+#define IMAGE "/Users/W_littlewhite/Documents/Git/OCR-Cut/real_img5s.jpg"
 
 bool IsDimodal(double HistGram[256]);
 
@@ -45,9 +45,8 @@ int main(int argc, char **argv)
     for( i = 0; i < lines->total; i++ )
     {
         line = (CvPoint*)cvGetSeqElem(lines,i);
-        linesLong[i] = sqrt((line[1].x - line[0].x) * (line[1].x - line[0].x) + (line[1].y - line[0].y) * (line[1].y - line[0].y));
-//        printf("%d\n",linesLong[i]);
-//        cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 3, CV_AA, 0 );
+        linesLong[i] = (int)sqrt((line[1].x - line[0].x) * (line[1].x - line[0].x) + (line[1].y - line[0].y) * (line[1].y - line[0].y));
+
     }
     for (int m = 0; m<i-1; m++) {
         for (int n = 1; n<i; n++) {
@@ -58,14 +57,11 @@ int main(int argc, char **argv)
             }
         }
     }
-//    for (int m = 0; m<i; m++) {
-        printf("%d\n啦啦啦",linesLong[0]);
-//    }
+
     for( i = 0; i < lines->total; i++ )
     {
         line = (CvPoint*)cvGetSeqElem(lines,i);
-        printf("%f\n",sqrt((line[1].x - line[0].x) * (line[1].x - line[0].x) + (line[1].y - line[0].y) * (line[1].y - line[0].y)));
-        if (sqrt((line[1].x - line[0].x) * (line[1].x - line[0].x) + (line[1].y - line[0].y) * (line[1].y - line[0].y)) == linesLong[0]) {
+        if ((int)sqrt((line[1].x - line[0].x) * (line[1].x - line[0].x) + (line[1].y - line[0].y) * (line[1].y - line[0].y)) == linesLong[0]) {
             printf("画图啊");
             cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 3, CV_AA, 0 );
         }
