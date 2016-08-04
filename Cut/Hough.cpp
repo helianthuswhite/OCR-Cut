@@ -16,7 +16,7 @@ int main(int argc, char **argv)
     CvMemStorage* storage = cvCreateMemStorage(0);
     CvSeq* lines = 0;
     CvPoint* line;
-    int* linesLong = {0};
+    int linesLong[100] = {0};
     int i;
     
     if( !src )
@@ -45,26 +45,31 @@ int main(int argc, char **argv)
     for( i = 0; i < lines->total; i++ )
     {
         line = (CvPoint*)cvGetSeqElem(lines,i);
-        printf("%d 呵呵 %d\n",line[1].x,line[0].x);
-        cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 3, CV_AA, 0 );
-//        linesLong[i] = line[1].x - line[0].x;
+        linesLong[i] = sqrt((line[1].x - line[0].x) * (line[1].x - line[0].x) + (line[1].y - line[0].y) * (line[1].y - line[0].y));
+//        printf("%d\n",linesLong[i]);
+//        cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 3, CV_AA, 0 );
     }
-//    for (int m = 0; m<i-1; m++) {
-//        for (int n = 1; n<i; n++) {
-//            if (linesLong[m]<=linesLong[n]) {
-//                int temp = linesLong[m];
-//                linesLong[m] = linesLong[n];
-//                linesLong[n] = temp;
-//            }
-//        }
+    for (int m = 0; m<i-1; m++) {
+        for (int n = 1; n<i; n++) {
+            if (linesLong[m]<=linesLong[n]) {
+                int temp = linesLong[m];
+                linesLong[m] = linesLong[n];
+                linesLong[n] = temp;
+            }
+        }
+    }
+//    for (int m = 0; m<i; m++) {
+        printf("%d\n啦啦啦",linesLong[0]);
 //    }
-//    for( i = 0; i < lines->total; i++ )
-//    {
-//        line = (CvPoint*)cvGetSeqElem(lines,i);
-//        if ((line[1].x - line[0].x) == linesLong[0]) {
-//            cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 3, CV_AA, 0 );
-//        }
-//    }
+    for( i = 0; i < lines->total; i++ )
+    {
+        line = (CvPoint*)cvGetSeqElem(lines,i);
+        printf("%f\n",sqrt((line[1].x - line[0].x) * (line[1].x - line[0].x) + (line[1].y - line[0].y) * (line[1].y - line[0].y)));
+        if (sqrt((line[1].x - line[0].x) * (line[1].x - line[0].x) + (line[1].y - line[0].y) * (line[1].y - line[0].y)) == linesLong[0]) {
+            printf("画图啊");
+            cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 3, CV_AA, 0 );
+        }
+    }
 
     cvNamedWindow( "Source", 1 );
     cvShowImage( "Source", src );
