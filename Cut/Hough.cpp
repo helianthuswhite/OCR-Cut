@@ -2,7 +2,7 @@
 #include "opencv2/highgui.hpp"
 #include "math.h"
 
-#define IMAGE "/Users/W_littlewhite/Documents/Git/OCR-Cut/real_img5s.jpg"
+#define IMAGE "/Users/W_littlewhite/Documents/Git/OCR-Cut/real_img2s.jpg"
 
 bool IsDimodal(double HistGram[256]);
 
@@ -18,6 +18,7 @@ int main(int argc, char **argv)
     CvPoint* line;
     int linesLong[100] = {0};
     int i;
+    double alpha = 0;
     
     if( !src )
     {
@@ -62,8 +63,9 @@ int main(int argc, char **argv)
     {
         line = (CvPoint*)cvGetSeqElem(lines,i);
         if ((int)sqrt((line[1].x - line[0].x) * (line[1].x - line[0].x) + (line[1].y - line[0].y) * (line[1].y - line[0].y)) == linesLong[0]) {
-            printf("画图啊");
             cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 3, CV_AA, 0 );
+            alpha = atan(std::abs(1.0*(line[1].y - line[0].y)/(line[1].x - line[0].x)));
+            printf("%lf",alpha);
         }
     }
 
