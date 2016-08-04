@@ -48,12 +48,7 @@ int main(int argc, char* argv[])
 //    cvAdaptiveThreshold(img_gray, img_gray, 255,CV_ADAPTIVE_THRESH_MEAN_C,CV_THRESH_BINARY_INV);// CV_THRESH_BINARY_INV使得背景为黑色，字符为白色，这样找到的最外层才是字符的最外层
     cvNamedWindow("Threshold",0);
     cvShowImage("Threshold", img_gray);
-    
-////    降噪处理
-//    cvSmooth(img_gray, img_gray,CV_GAUSSIAN);
-//    cvSmooth(img_gray, img_gray,CV_GAUSSIAN);
-//    cvShowImage("Smooth", img_gray);
-    
+        
 //    执行行投影操作
     int *h = project(img_gray,img_gray->height);
 
@@ -70,22 +65,6 @@ int main(int argc, char* argv[])
     cvDestroyAllWindows();
     return 0;  
 }
-
-////最小值法寻找阈值
-//int findThreshold(IplImage* src) {
-//    int min;
-//    //对每一行计算投影值
-//    for(int y = 0;y < src->height;y++)
-//    {
-//        uchar* ptr = (uchar*)(src->imageData + y*src->widthStep);
-//        //遍历这一行的每一个像素，如果是有效的，累加投影值
-//        for(int x = 0;x < src->width;x++)
-//        {
-//            if(ptr[x] !=)
-//        }
-//    }
-//    return min;
-//}
 
 
 int* project(IplImage* src,int number) {
