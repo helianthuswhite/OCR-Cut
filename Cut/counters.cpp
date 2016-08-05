@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
     double angle = findAngle(img_gray);
 //    cvCanny( img_gray, img_gray, 50, 200, 3 );
     
-    img_gray = rotate(img_gray, angle);
+    img_gray = rotate(img_gray, -angle*180/M_PI);
     
     cvShowImage("ThresholdImg",img_gray);
     CvSeq* contours = NULL;  
@@ -159,12 +159,15 @@ double findAngle(IplImage* src) {
     int i;
     double alpha = 0;
     
-    cvCanny( src, src, 50, 200, 3 );
+    IplImage* img_temp = cvCreateImage(cvGetSize(src), IPL_DEPTH_8U, 1);
+    cvCopyImage(src, img_temp);
+    
+    cvCanny( img_temp, img_temp, 50, 200, 3 );
     
 //    cvCvtColor( src, src, CV_GRAY2BGR );
     
     //累积概率hough变换
-    lines = cvHoughLines2( src, storage, CV_HOUGH_PROBABILISTIC, 1, CV_PI/180, 100, 50, 100 );
+    lines = cvHoughLines2( img_temp, storage, CV_HOUGH_PROBABILISTIC, 1, CV_PI/180, 100, 50, 100 );
     for( i = 0; i < lines->total; i++ )
     {
         //        获取到每一条直线的长度
@@ -191,7 +194,6 @@ double findAngle(IplImage* src) {
 //            printf("%lf",alpha);
         }
     }
-    
     return alpha;
 
 }
