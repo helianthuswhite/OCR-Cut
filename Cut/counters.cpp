@@ -42,33 +42,33 @@ int main(int argc, char* argv[])
 //    cvAdaptiveThreshold(img_gray, img_gray, 255,CV_ADAPTIVE_THRESH_MEAN_C,CV_THRESH_BINARY_INV);
     
     //膨胀操作
-    cvDilate(img_gray, img_gray,NULL,4);
+    cvDilate(img_gray, img_gray,NULL,2);
     
     double angle = findAngle(img_gray);
 //    cvCanny( img_gray, img_gray, 50, 200, 3 );
     
+    imgSrc = rotate(imgSrc, -angle*180/M_PI);
     img_gray = rotate(img_gray, -angle*180/M_PI);
     
     cvShowImage("ThresholdImg",img_gray);
     CvSeq* contours = NULL;  
     CvMemStorage* storage = cvCreateMemStorage(0);
 //    检索轮廓并返回检测到的轮廓数量
-    int count = cvFindContours(img_gray, storage, &contours,
+    cvFindContours(img_gray, storage, &contours,
         sizeof(CvContour),CV_RETR_EXTERNAL);  
     // cvReleaseMemStorage(& storage);   
-    printf("轮廓个数：%d\n",count);
-    int idx = 0;  
+    int idx = 0;
     char szName[56] = {0};  
-//    int tempCount=0;
 //    显示绘制的结果
     for (CvSeq* c = contours; c != NULL; c = c->h_next) {
-         CvRect rc =cvBoundingRect(c,0);  
-         cvDrawRect(imgSrc, cvPoint(rc.x, rc.y), cvPoint(rc.x + rc.width, rc.y + rc.height), CV_RGB(255, 0, 0));  
-  
-      // if () {这里可以根据轮廓的大小进行筛选,上面源图片有瑕疵可以用腐蚀，膨胀来祛除  
-      //    continue;  
-     //  }  
+         CvRect rc =cvBoundingRect(c,0);
+        
+         if (rc.height < 50||rc.width < 50) {    //这里可以根据轮廓的大小进行筛选,上面源图片有瑕疵可以用腐蚀，膨胀来祛除
+            continue;
+         }
 //          设置ROI并显示分割后的结果
+        cvDrawRect(imgSrc, cvPoint(rc.x, rc.y), cvPoint(rc.x + rc.width, rc.y + rc.height), CV_RGB(255, 0, 0));
+        
         IplImage* imgNo = cvCreateImage(cvSize(rc.width, rc.height), IPL_DEPTH_8U, 3);
         cvSetImageROI(imgSrc, rc);  
         cvCopyImage(imgSrc, imgNo);  
