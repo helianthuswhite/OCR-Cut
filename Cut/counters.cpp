@@ -3,7 +3,7 @@
 #include <opencv/cxcore.h> 
 #include <sys/time.h>
 
-#define IMAGE "/Users/W_littlewhite/Documents/Git/OCR-Cut/real_img2s.jpg"
+#define IMAGE "/Users/W_littlewhite/Documents/Git/OCR-Cut/test_img3.png"
 
 using namespace cv;
 
