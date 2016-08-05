@@ -36,7 +36,7 @@ int main(int argc, char **argv)
     cvThreshold(src, dst,threshold, 255,CV_THRESH_BINARY_INV);
     
     //膨胀操作
-    cvDilate(dst, dst,NULL,10);
+    cvDilate(dst, dst,NULL,4);
     
     cvCanny( dst, dst, 50, 200, 3 );
     //cvThreshold(src, dst, 50, 255, CV_THRESH_BINARY_INV);
