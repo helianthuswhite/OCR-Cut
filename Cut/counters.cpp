@@ -3,7 +3,7 @@
 #include <opencv/cxcore.h> 
 #include <sys/time.h>
 
-#define IMAGE "/Users/W_littlewhite/Documents/Git/OCR-Cut/test_img2.png"
+#define IMAGE "/Users/W_littlewhite/Documents/Git/OCR-Cut/real_img2s.jpg"
 
 using namespace cv;
 
@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
 //    cvAdaptiveThreshold(img_gray, img_gray, 255,CV_ADAPTIVE_THRESH_MEAN_C,CV_THRESH_BINARY_INV);
     
     //膨胀操作
-    cvDilate(img_gray, img_gray,NULL,1);
+    cvDilate(img_gray, img_gray,NULL,3);
     
     double angle = findAngle(img_gray);
 //    cvCanny( img_gray, img_gray, 50, 200, 3 );
