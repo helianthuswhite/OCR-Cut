@@ -3,11 +3,9 @@
 #include <opencv/cxcore.h>
 #include <sys/time.h>
 
-#define IMAGE "/Users/W_littlewhite/Documents/Git/OCR-Cut/test_img2.png"
+#define IMAGE "/Users/W_littlewhite/Documents/Git/OCR-Cut/real_img2s.jpg"
 
 using namespace cv;
-
-int findThreshold(IplImage* src);
 
 int* project(IplImage* src,int number);
 
@@ -16,6 +14,10 @@ void cut(int* h,IplImage* src,int number);
 bool IsDimodal(double HistGram[256]);
 
 int FindThreshold(IplImage* imgSrc);
+
+IplImage* rotate(IplImage* src,double angle);
+
+double findAngle(IplImage* src);
 
 long getCurrentTime()
 {
@@ -46,6 +48,16 @@ int main(int argc, char* argv[])
     
 //    局部自适应二值化处理
 //    cvAdaptiveThreshold(img_gray, img_gray, 255,CV_ADAPTIVE_THRESH_MEAN_C,CV_THRESH_BINARY_INV);// CV_THRESH_BINARY_INV使得背景为黑色，字符为白色，这样找到的最外层才是字符的最外层
+    
+    //膨胀操作
+    cvDilate(img_gray, img_gray,NULL,1);
+    
+    double angle = findAngle(img_gray);
+    //    cvCanny( img_gray, img_gray, 50, 200, 3 );
+    
+    imgSrc = rotate(imgSrc, -angle*180/M_PI);
+    img_gray = rotate(img_gray, -angle*180/M_PI);
+    
     cvNamedWindow("Threshold",0);
     cvShowImage("Threshold", img_gray);
         
@@ -199,4 +211,78 @@ bool IsDimodal(double HistGram[256]) {
         return true;
     else
         return false;
+}
+
+//通过Hough变换来检测直线并返回角度
+double findAngle(IplImage* src) {
+    CvMemStorage* storage = cvCreateMemStorage(0);
+    CvSeq* lines = 0;
+    CvPoint* line;
+    int linesLong[100] = {0};
+    int i;
+    double alpha = 0;
+    
+    IplImage* img_temp = cvCreateImage(cvGetSize(src), IPL_DEPTH_8U, 1);
+    cvCopyImage(src, img_temp);
+    
+    cvCanny( img_temp, img_temp, 50, 200, 3 );
+    
+    //    cvCvtColor( src, src, CV_GRAY2BGR );
+    
+    //累积概率hough变换
+    lines = cvHoughLines2( img_temp, storage, CV_HOUGH_PROBABILISTIC, 1, CV_PI/180, 100, 50, 100 );
+    for( i = 0; i < lines->total; i++ )
+    {
+        //        获取到每一条直线的长度
+        line = (CvPoint*)cvGetSeqElem(lines,i);
+        linesLong[i] = (int)sqrt((line[1].x - line[0].x) * (line[1].x - line[0].x) + (line[1].y - line[0].y) * (line[1].y - line[0].y));
+        
+    }
+    //    冒泡排序找到最长直线
+    for (int m = 0; m<i-1; m++) {
+        for (int n = 1; n<i; n++) {
+            if (linesLong[m]<=linesLong[n]) {
+                int temp = linesLong[m];
+                linesLong[m] = linesLong[n];
+                linesLong[n] = temp;
+            }
+        }
+    }
+    //    选取最长直线为标准求角度
+    for( i = 0; i < lines->total; i++ )
+    {
+        line = (CvPoint*)cvGetSeqElem(lines,i);
+        if ((int)sqrt((line[1].x - line[0].x) * (line[1].x - line[0].x) + (line[1].y - line[0].y) * (line[1].y - line[0].y)) == linesLong[0]) {
+            alpha = atan(std::abs(1.0*(line[1].y - line[0].y)/(line[1].x - line[0].x)));
+            //            printf("%lf",alpha);
+        }
+    }
+    return alpha;
+    
+}
+
+//传入角度对图像进行旋转
+IplImage* rotate(IplImage* src,double angle) {
+    //    创建矩阵
+    CvMat* rot_mat = cvCreateMat(2,3,CV_32FC1);
+    IplImage *dst;
+    //        复制图像
+    dst = cvCloneImage(src);
+    //        设置原点
+    dst->origin = src->origin;
+    //        初始化元素值
+    cvZero(dst);
+    
+    //COMPUTE ROTATION MATRIX
+    //        创建旋转矩阵
+    CvPoint2D32f center = cvPoint2D32f(src->width/2,
+                                       src->height/2);
+    double scale = 1;
+    //        生成旋转的映射矩阵
+    cv2DRotationMatrix(center,angle,scale,rot_mat);
+    //        进行仿射变换
+    cvWarpAffine(src,dst,rot_mat);
+    
+    return dst;
+    
 }
